@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: SpringAI
+  ai:
+    openai:
+      api-key: ${OpenAI-Key}
+  devtools:
+    restart:
+      enabled: false
+
+springdoc:
+  api-docs:
+    path: /api-docs
+
+logging:
+  pattern:
+    console: '%green(%d{yyyy-MM-dd HH:mm:ss.SSS}) [%thread] %blue(%-5level) %yellow(%logger{36}) - %msg%n'
