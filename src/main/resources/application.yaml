@@ -3,7 +3,7 @@ spring:
     name: SpringAI
   ai:
     openai:
-      api-key: ${OpenAI-Key}
+      api-key: ${OPENAI_API_KEY:}
   devtools:
     restart:
       enabled: false

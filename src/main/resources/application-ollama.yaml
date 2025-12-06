@@ -1,0 +1,10 @@
+spring:
+  ai:
+    model:
+      chat: ollama
+    ollama:
+      chat:
+        options:
+          model: llama3.2:3b
+
+
