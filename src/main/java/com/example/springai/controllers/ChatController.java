@@ -2,6 +2,7 @@ package com.example.springai.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +21,9 @@ class ChatController {
     private Resource userPromptTemplate;
 
     ChatController(ChatClient.Builder builder) {
-        chatClient = builder.build();
+        chatClient = builder
+                .defaultAdvisors(new SimpleLoggerAdvisor())
+                .build();
     }
 
     @GetMapping("chat")
