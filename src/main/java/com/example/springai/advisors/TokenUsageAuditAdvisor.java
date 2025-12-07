@@ -5,6 +5,7 @@ import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.api.CallAdvisor;
 import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
+import org.springframework.ai.chat.metadata.RateLimit;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
 
@@ -20,6 +21,10 @@ public class TokenUsageAuditAdvisor implements CallAdvisor {
             Usage usage = chatResponse.getMetadata().getUsage();
             if( usage !=null ){
                 log.info("Token Usage Details: {}", usage);
+            }
+            RateLimit rateLimit = chatResponse.getMetadata().getRateLimit();
+            if( rateLimit !=null ){
+                log.info("Rate Limit Details: {}", rateLimit);
             }
         }
         return chatClientResponse;
