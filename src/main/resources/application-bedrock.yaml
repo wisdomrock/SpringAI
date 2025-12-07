@@ -1,5 +1,7 @@
 spring:
   ai:
+    model:
+      chat: bedrock-converse
     bedrock:
       aws:
         region: us-east-1
@@ -8,8 +10,7 @@ spring:
       converse:
         chat:
           options:
-            model1: "anthropic.claude-3-haiku-20240307-v1:0"
-            model: "qwen.qwen3-vl-235b-a22b"
+            model: "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 
   autoconfigure:
     exclude:
