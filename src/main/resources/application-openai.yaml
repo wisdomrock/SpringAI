@@ -1,4 +1,9 @@
 spring:
+  ai:
+    openai:
+       chat:
+         options:
+           model:
   autoconfigure:
     exclude:
       - org.springframework.ai.model.ollama.autoconfigure.OllamaChatAutoConfiguration
