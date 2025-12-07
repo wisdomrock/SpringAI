@@ -1,0 +1,17 @@
+spring:
+  ai:
+    bedrock:
+      aws:
+        region: us-east-1
+        access-key: "${aws-access-key}"
+        secret-key: "${aws-secret-key}"
+      converse:
+        chat:
+          options:
+            model1: "anthropic.claude-3-haiku-20240307-v1:0"
+            model: "qwen.qwen3-vl-235b-a22b"
+
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.ollama.autoconfigure.OllamaChatAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiChatAutoConfiguration
