@@ -10,6 +10,7 @@ import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.ai.converter.ListOutputConverter;
 import org.springframework.ai.converter.MapOutputConverter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,6 +52,18 @@ class StructuredResponseController {
                 .call()
                 //.entity(CountryCities.class);
                 .entity(new BeanOutputConverter<>(CountryCities.class));
+        return ResponseEntity.ok(countryCities);
+    }
+
+    @GetMapping("country-city-list")
+    ResponseEntity<List<CountryCities>> countryCityList(@RequestParam String message){
+        //please provide me the country and their city details in Europe, with the biggest 3 countries expected
+        List<CountryCities> countryCities =  chatClient
+                .prompt()
+                .user(message)
+                .call()
+                //.entity(CountryCities.class);
+                .entity(new ParameterizedTypeReference<List<CountryCities>>(){});
         return ResponseEntity.ok(countryCities);
     }
 
