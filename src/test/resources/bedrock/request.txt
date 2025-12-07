@@ -1,0 +1,8 @@
+aws bedrock-runtime invoke-model \
+--model-id deepseek.v3-v1:0 \
+--body "{\"prompt\":\"which small GPU manufacturers will have the biggest potential\",\"temperature\":1}" \
+--cli-binary-format raw-in-base64-out \
+--performance-config-latency standard \
+--region us-east-2 \
+invoke-model-output.txt
+
