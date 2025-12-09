@@ -14,13 +14,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ChatClientConfig {
 
-    @Bean //injected using @Qualifier("openAiChartClient")
-    ChatClient openAiChartClient(OpenAiChatModel openAiChatModel){
+    @Bean //injected using @Qualifier("openAiChatClient")
+    ChatClient openAiChatClient(OpenAiChatModel openAiChatModel){
         return ChatClient.create(openAiChatModel);
     }
 
-    @Bean //injected using @Qualifier("ollamaChartClient")
-    ChatClient ollamaChartClient(OllamaChatModel ollamaChatModel){
+    @Bean //injected using @Qualifier("ollamaChatClient")
+    ChatClient ollamaChatClient(OllamaChatModel ollamaChatModel){
         //return ChatClient.create(ollamaChatModel);
         ChatClient.Builder chatClientBuilder = ChatClient.builder(ollamaChatModel);
         //there will be more control with the Builder as we can pass additional info
