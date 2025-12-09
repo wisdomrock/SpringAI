@@ -1,0 +1,3 @@
+-- copy from JdbcChatMemoryRepository schema-h2.sql or schema-hsqldb.sql
+-- timestamp column must be quoted as "timestamp" everywhere
+-- if h2 DB already created by the wrong column, the file must be deleted and re-created.

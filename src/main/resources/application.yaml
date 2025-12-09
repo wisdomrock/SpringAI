@@ -10,6 +10,8 @@ spring:
   devtools:
     restart:
       enabled: false
+  config:
+    import: classpath:h2-db-file.properties
 
 springdoc:
   api-docs:
