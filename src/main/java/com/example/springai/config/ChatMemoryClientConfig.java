@@ -6,17 +6,32 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.memory.repository.jdbc.JdbcChatMemoryRepository;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 //MessageWindowChatMemory - what to store
-//InMemoryChatMemoryRepository, JdbcChatMemoryRepository
+//InMemoryChatMemoryRepository, JdbcChatMemoryRepository (used first by spring boot if found in classpath)
 //SystemMessages are treated specially and only one such message will be kept
 //MessageChatMemoryAdvisor, PromptChatMemoryAdvisor
 //VectorStoreChatMemoryAdvisor stores memory in vector DB (Qdrant, Pinecone)
 @Configuration
 public class ChatMemoryClientConfig {
+
+    @Bean
+    ChatMemory chatMemory(JdbcChatMemoryRepository jdbcChatMemoryRepository){
+        //customize the chat memory
+        //MessageWindowChatMemory is the default choice of ChatMemory
+        //InMemoryChatMemoryRepository is the default ChatMemory Repository
+        //SpringAI also supports Neo4jChatMemoryRepository by spring-ai-starter-model-chat-memory-repository-neo4j
+        //SpringAI also supports CassandraChatMemoryRepository by spring-ai-starter-model-chat-memory-repository-cassandra
+        return MessageWindowChatMemory.builder()
+                .maxMessages(10)
+                .chatMemoryRepository(jdbcChatMemoryRepository)
+                .build();
+    }
 
     //@Bean("memoryChatClient")
     @Bean //injected using @Qualifier("memoryChatClient")
