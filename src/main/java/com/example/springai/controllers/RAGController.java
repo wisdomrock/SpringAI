@@ -21,9 +21,7 @@ import java.util.stream.Collectors;
 public class RAGController {
     private final @Qualifier("memoryChatClient") ChatClient chatClient;
     private final VectorStore vectorStore;
-
-    @Value("classpath:/promptTemplates/systemPromptRandomDataTemplate.st")
-    private Resource promptTemplate;
+    private final @Value("classpath:/promptTemplates/systemPromptRandomDataTemplate.st") Resource promptTemplate;
 
     @GetMapping("random/chat")
     ResponseEntity<String> chatMemory(@RequestHeader String username, @RequestParam String message){
@@ -35,6 +33,7 @@ public class RAGController {
         List<Document> similarDocs = vectorStore.similaritySearch(searchRequest);
         String similarContext = similarDocs.stream().map(Document::getText)
                 .collect(Collectors.joining(System.lineSeparator()));
+        //"code":500,"message":"Conversation roles must alternate user/assistant/user/assistant/
         String answer = chatClient.prompt()
                 .system(promptSystemSpec -> promptSystemSpec.text(promptTemplate)
                         .param("documents", similarContext))
