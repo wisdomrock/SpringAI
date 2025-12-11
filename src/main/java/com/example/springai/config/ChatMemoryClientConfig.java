@@ -41,6 +41,7 @@ public class ChatMemoryClientConfig {
                 //.presencePenalty(0.6)
                 //.stopSequences(List.of("END"))
                 .temperature(1.0)
+                .maxTokens(300)
                 .build();
         //For OpenAI specific ChatOptions, use OpenAiChatOptions
         Advisor memoryAdvisor =  MessageChatMemoryAdvisor.builder(chatMemory).build();
