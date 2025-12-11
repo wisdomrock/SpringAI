@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping
+@RequestMapping("/api/chat")
 class ChatMemoryController {
     private final ChatClient chatClient;
 
