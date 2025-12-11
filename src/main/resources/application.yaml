@@ -7,11 +7,22 @@ spring:
         enabled: true
     openai:
       api-key: ${OPENAI_API_KEY:}
+    vectorstore:
+      qdrant:
+        initialize-schema: true
+        host: localhost
+        port: 6334
+        collection-name: llmtest
+
   devtools:
     restart:
       enabled: false
   config:
     import: classpath:h2-db-file.properties
+  docker:
+    compose:
+      stop:
+        command: DOWN
 
 springdoc:
   api-docs:
