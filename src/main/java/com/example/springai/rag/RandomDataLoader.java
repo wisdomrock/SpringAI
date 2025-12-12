@@ -25,6 +25,6 @@ public class RandomDataLoader {
     public void loadSentencesIntoVectorStore() throws Exception {
         List<String> sentences = Files.readAllLines(Paths.get(sourceFile.getURI()));
         List<Document> documents = sentences.stream().map(Document::new).collect(Collectors.toList());
-        vectorStore.add(documents);
+        //vectorStore.add(documents);
     }
 }

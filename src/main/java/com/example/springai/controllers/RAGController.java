@@ -19,12 +19,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/rag")
 @RequiredArgsConstructor
 public class RAGController {
-    private final @Qualifier("memoryChatClient") ChatClient chatClient;
     private final VectorStore vectorStore;
+    private final @Qualifier("memoryChatClient") ChatClient chatClient;
     private final @Value("classpath:/promptTemplates/systemPromptRandomDataTemplate.st") Resource promptTemplate;
+    private final @Value("classpath:/promptTemplates/systemPromptPolicyTemplate.st") Resource policyTemplate;
+
 
     @GetMapping("random/chat")
-    ResponseEntity<String> chatMemory(@RequestHeader String username, @RequestParam String message){
+    ResponseEntity<String> randomChat(@RequestHeader String username, @RequestParam String message){
         SearchRequest searchRequest = SearchRequest.builder()
                 .query(message)
                 .topK(3)
@@ -36,6 +38,26 @@ public class RAGController {
         //"code":500,"message":"Conversation roles must alternate user/assistant/user/assistant/
         String answer = chatClient.prompt()
                 .system(promptSystemSpec -> promptSystemSpec.text(promptTemplate)
+                        .param("documents", similarContext))
+                .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, username))
+                .user(message)
+                .call().content();
+        return ResponseEntity.ok(answer);
+    }
+
+    @GetMapping("document/chat")
+    ResponseEntity<String> documentChat(@RequestHeader String username, @RequestParam String message){
+        SearchRequest searchRequest = SearchRequest.builder()
+                .query(message)
+                .topK(3) //this is very important
+                .similarityThreshold(0.5)
+                .build();
+        List<Document> similarDocs = vectorStore.similaritySearch(searchRequest);
+        String similarContext = similarDocs.stream().map(Document::getText)
+                .collect(Collectors.joining(System.lineSeparator()));
+        //"code":500,"message":"Conversation roles must alternate user/assistant/user/assistant/
+        String answer = chatClient.prompt()
+                .system(promptSystemSpec -> promptSystemSpec.text(policyTemplate)
                         .param("documents", similarContext))
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, username))
                 .user(message)
