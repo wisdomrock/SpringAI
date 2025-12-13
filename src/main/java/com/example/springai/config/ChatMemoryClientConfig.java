@@ -2,6 +2,7 @@ package com.example.springai.config;
 
 import com.example.springai.advisors.RequestHeaderAdvisor;
 import com.example.springai.advisors.TokenUsageAuditAdvisor;
+import com.example.springai.rag.WebSearchDocumentRetriever;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
@@ -13,8 +14,10 @@ import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestClient;
 
 //MessageWindowChatMemory - what to store
 //InMemoryChatMemoryRepository, JdbcChatMemoryRepository (used first by spring boot if found in classpath)
@@ -23,6 +26,8 @@ import org.springframework.context.annotation.Configuration;
 //VectorStoreChatMemoryAdvisor stores memory in vector DB (Qdrant, Pinecone)
 @Configuration
 public class ChatMemoryClientConfig {
+    @Value("${TAVILY_SEARCH_API_KEY}")
+    private String tavilyApiKey;
 
     @Bean
     ChatMemory chatMemory(JdbcChatMemoryRepository jdbcChatMemoryRepository){
@@ -59,10 +64,40 @@ public class ChatMemoryClientConfig {
                 .build();
     }
 
+    @Bean("webSearchRAGChatClient")
+    ChatClient webSearchRAGChatClient(ChatClient.Builder chatClientBuilder, RestClient.Builder restClientBuilder,
+                                ChatMemory chatMemory,
+                                RequestHeaderAdvisor requestHeaderAdvisor){
+        ChatOptions chatOptions = ChatOptions.builder()
+                //.model()
+                //.presencePenalty(0.6)
+                //.stopSequences(List.of("END"))
+                .temperature(1.0)
+                .maxTokens(300)
+                .build();
+        //For OpenAI specific ChatOptions, use OpenAiChatOptions
+        Advisor memoryAdvisor =  MessageChatMemoryAdvisor.builder(chatMemory).build();
+        var retrievalAugmentationAdvisor = RetrievalAugmentationAdvisor.builder()
+                .documentRetriever(
+                        WebSearchDocumentRetriever.builder()
+                                .apiKey(tavilyApiKey)
+                                .resultLimit(5)
+                                .restClientBuilder(restClientBuilder)
+                                .build())
+                .build();
+
+        return chatClientBuilder
+                .defaultOptions(chatOptions)
+                .defaultAdvisors(new SimpleLoggerAdvisor(), memoryAdvisor,
+                        new TokenUsageAuditAdvisor(), requestHeaderAdvisor, retrievalAugmentationAdvisor)
+                .build();
+    }
+
     @Bean
     RetrievalAugmentationAdvisor retrievalAugmentationAdvisor(VectorStore vectorStore){
         //The RetrievalAugmentationAdvisor will take care of the cross-cutting concerns
         //such as vectorStore similaritySearch, passing system prompt etc.
+        //internally it uses DocumentRetriever (VectorStoreDocumentRetriever)
         return RetrievalAugmentationAdvisor.builder()
                 .documentRetriever(
                       VectorStoreDocumentRetriever.builder()
@@ -71,6 +106,5 @@ public class ChatMemoryClientConfig {
                               .similarityThreshold(0.5)
                           .build())
                 .build();
-
     }
 }

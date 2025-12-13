@@ -2,7 +2,6 @@ package com.example.springai.controllers;
 
 import com.example.springai.advisors.RequestHeaders;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -22,6 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RAGController implements RequestHeaders {
     private final VectorStore vectorStore;
+    private final @Qualifier("webSearchRAGChatClient") ChatClient webSearchRAGChatClient;
     private final @Qualifier("memoryChatClient") ChatClient chatClient;
     private final @Value("classpath:/promptTemplates/systemPromptRandomDataTemplate.st") Resource promptTemplate;
     private final @Value("classpath:/promptTemplates/systemPromptPolicyTemplate.st") Resource policyTemplate;
@@ -48,11 +48,19 @@ public class RAGController implements RequestHeaders {
     }
 
     @GetMapping("document/chat")
-    ResponseEntity<String> documentChat(@RequestHeader(name=USER_ID_HEADER, required = false) String username, @RequestParam String message){
+    ResponseEntity<String> documentChat(@RequestHeader(name=USER_ID_HEADER, required = false) String userId, @RequestParam String message){
         //RetrievalAugmentationAdvisor is configured to the ChatClient which will do RAG automatically
         //.advisors(advisorSpec -> {if(StringUtils.isNotBlank(username)) advisorSpec.param(ChatMemory.CONVERSATION_ID, username);})
         //"code":500,"message":"Conversation roles must alternate user/assistant/user/assistant/
         String answer = chatClient.prompt()
+                .user(message)
+                .call().content();
+        return ResponseEntity.ok(answer);
+    }
+
+    @GetMapping("web-search/chat")
+    ResponseEntity<String> webSearchChat(@RequestHeader(name=USER_ID_HEADER, required = false) String userId, @RequestParam String message){
+        String answer = webSearchRAGChatClient.prompt()
                 .user(message)
                 .call().content();
         return ResponseEntity.ok(answer);

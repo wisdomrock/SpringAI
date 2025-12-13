@@ -34,7 +34,7 @@ public class HRPolicyLoader {
             List<Document> docs = tikaDocumentReader.get();
             TextSplitter textSplitter = TokenTextSplitter.builder().withChunkSize(100).withMaxNumChunks(400).build();
             log.info("Adding {} documents to the vector store", docs.size());
-            vectorStore.add(textSplitter.split(docs));
+            //vectorStore.add(textSplitter.split(docs));
         };
         //vectorStore.delete("1 == 1"); // A filter that is always true
         vectorStore.getNativeClient().filter(s->s instanceof  QdrantClient).ifPresent(client -> {
