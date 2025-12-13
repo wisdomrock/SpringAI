@@ -1,5 +1,6 @@
 package com.example.springai.config;
 
+import com.example.springai.advisors.RequestHeaderAdvisor;
 import com.example.springai.advisors.TokenUsageAuditAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -9,6 +10,9 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.memory.repository.jdbc.JdbcChatMemoryRepository;
 import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
+import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,7 +39,10 @@ public class ChatMemoryClientConfig {
 
     //@Bean("memoryChatClient")
     @Bean //injected using @Qualifier("memoryChatClient")
-    ChatClient memoryChatClient(ChatClient.Builder chatClientBuilder, ChatMemory chatMemory){
+    ChatClient memoryChatClient(ChatClient.Builder chatClientBuilder,
+                                ChatMemory chatMemory,
+                                RequestHeaderAdvisor requestHeaderAdvisor,
+                                RetrievalAugmentationAdvisor retrievalAugmentationAdvisor){
         ChatOptions chatOptions = ChatOptions.builder()
                 //.model()
                 //.presencePenalty(0.6)
@@ -47,7 +54,23 @@ public class ChatMemoryClientConfig {
         Advisor memoryAdvisor =  MessageChatMemoryAdvisor.builder(chatMemory).build();
         return chatClientBuilder
                 .defaultOptions(chatOptions)
-                .defaultAdvisors(new SimpleLoggerAdvisor(), new TokenUsageAuditAdvisor(), memoryAdvisor)
+                .defaultAdvisors(new SimpleLoggerAdvisor(), memoryAdvisor,
+                        new TokenUsageAuditAdvisor(), requestHeaderAdvisor, retrievalAugmentationAdvisor)
                 .build();
+    }
+
+    @Bean
+    RetrievalAugmentationAdvisor retrievalAugmentationAdvisor(VectorStore vectorStore){
+        //The RetrievalAugmentationAdvisor will take care of the cross-cutting concerns
+        //such as vectorStore similaritySearch, passing system prompt etc.
+        return RetrievalAugmentationAdvisor.builder()
+                .documentRetriever(
+                      VectorStoreDocumentRetriever.builder()
+                          .vectorStore(vectorStore)
+                              .topK(3)
+                              .similarityThreshold(0.5)
+                          .build())
+                .build();
+
     }
 }
